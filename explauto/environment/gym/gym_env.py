@@ -13,7 +13,7 @@ class GymEnvironment(Environment):
         self.env.seed(123)
         self.last_observation = self.env.reset()
 
-        self.rollout_size = 10000000
+        self.rollout_size = 1000
 
         self.replay_buffer = []
 
@@ -25,7 +25,8 @@ class GymEnvironment(Environment):
         Environment.__init__(
             self,
             np.tile(self.env.action_space.low, self.rollout_size),
-            np.tile(self.env.action_space.high, self.rollout_size),     np.tile(self.env.observation_space.low, self.rollout_size),
+            np.tile(self.env.action_space.high, self.rollout_size),
+            np.tile(self.env.observation_space.low, self.rollout_size),
             np.tile(self.env.observation_space.high, self.rollout_size)
         )
 
@@ -35,12 +36,12 @@ class GymEnvironment(Environment):
         return(actions)
 
     def compute_sensori_effect(self, actions):
-        # We store a rallout as a series of (state, reward)
-        rollout = np.zeros((self.rollout_size, self.observation_space_dim + 1))
+        # We store a rallout as a series of states
+        rollout = np.zeros((self.rollout_size, self.observation_space_dim))
 
         for step, action in enumerate(actions):
             observation, reward, done, info = self.env.step([action])
-            rollout[step, :] = list(observation).append(reward)
+            rollout[step, :] = observation
             self.replay_buffer.append([self.last_observation, action, reward, observation])
 
             self.last_observation = observation
@@ -49,7 +50,7 @@ class GymEnvironment(Environment):
                 print("Done!")
                 break
 
-        return(rollout)
+        return(rollout.flatten())
 
     def reset(self):
         self.env.reset()
