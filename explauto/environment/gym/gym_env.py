@@ -5,11 +5,15 @@ import numpy as np
 
 class GymEnvironment(Environment):
     def __init__(self, name):
-        self.env = openai_gym.make(name)
+        env = openai_gym.make(name)
+
+        #env = openai_gym.wrappers.Monitor(env, '/tmp/cartpole-experiment-1')
+
+        self.env = env
         self.env.seed(123)
         self.last_observation = self.env.reset()
 
-        self.rollout_size = 1000
+        self.rollout_size = 10000000
 
         self.replay_buffer = []
 
@@ -35,18 +39,20 @@ class GymEnvironment(Environment):
         rollout = np.zeros((self.rollout_size, self.observation_space_dim + 1))
 
         for step, action in enumerate(actions):
-            observation, reward, done, info = self.env.step(action)
+            observation, reward, done, info = self.env.step([action])
             rollout[step, :] = list(observation).append(reward)
             self.replay_buffer.append([self.last_observation, action, reward, observation])
 
             self.last_observation = observation
 
             if done:
+                print("Done!")
                 break
+
         return(rollout)
 
     def reset(self):
         self.env.reset()
 
-    def plot(self, ax, m, s, **kwargs_plot):
+    def plot(self, **kwargs_plot):
         self.env.render()
