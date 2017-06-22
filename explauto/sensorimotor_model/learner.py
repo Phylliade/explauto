@@ -49,7 +49,7 @@ class Learner(object):
             :arg y:  a output (effect) vector compatible with self.Sfeats.
         """
         self.imodel.add_xy(self._pre_x(x), self._pre_y(y))
-                
+
     def add_xy_batch(self, x_list, y_list): self.imodel.fmodel.add_xy_batch(x_list, y_list)
 
     def infer_order(self, goal, **kwargs):
