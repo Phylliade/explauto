@@ -9,7 +9,7 @@ def maximal_span_mountain_car(rollout):
 
 
 environment = GymEnvironment
-configurations = {'MCC': {"name": "MountainCarContinuous-v0", "observation_function": maximal_span_mountain_car, "s_mins": [-2, -2], "s_maxs": [2, 2]}}
+configurations = {'MCC': {"name": "MountainCarContinuous-v0", "observation_function": maximal_span_mountain_car, "s_mins": [-1.2, -1.2], "s_maxs": [0.6, 0.6]}}
 
 
 def testcases(**kwargs):

@@ -621,7 +621,7 @@ def unitdoctest():
         std deviation: [  3.00466854e-08   5.88400826e-08   1.18482371e-07   2.34837383e-07]
 
     The printed std deviations reflect the actual value in the parameters
-    of the function (not the one in the internal representation which 
+    of the function (not the one in the internal representation which
     can be different).
 
     Test of CMA_stds scaling option.
@@ -954,7 +954,7 @@ class BoundaryHandlerBase(object):
     def has_bounds(self):
         """return True, if any variable is bounded"""
         bounds = self.bounds
-        if bounds in (None, [None, None]):
+        if bounds is None or bounds is [None, None]:
             return False
         for ib, bound in enumerate(bounds):
             if bound is not None:
@@ -3443,7 +3443,7 @@ class CMAEvolutionStrategy(OOOptimizer):
         if popsize != self.sp.popsize:
             nmirrors = Mh.sround(popsize * self.sp.lam_mirr / self.sp.popsize)
             # TODO: now selective mirroring might be impaired
-        assert new_injections or self.opts['CMA_mirrormethod'] < 2 
+        assert new_injections or self.opts['CMA_mirrormethod'] < 2
         if new_injections and self.opts['CMA_mirrormethod'] != 1: # otherwise mirrors are done elsewhere
             nmirrors = 0
         assert nmirrors <= popsize // 2
@@ -4522,7 +4522,7 @@ class CMAOptions(dict):
     def merge(self, dict_=None):
         """not is use so far, see check()"""
         if dict_ is None and hasattr(self, '__dict__'):
-            dict_ = self.__dict__  
+            dict_ = self.__dict__
             # doesn't work anymore as we have _lock attribute
         if dict_ is None:
             return self
@@ -6074,7 +6074,7 @@ class CMADataLogger(BaseDataLogger):
     def plot(self, fig=None, iabscissa=1, iteridx=None,
              plot_mean=False, # was: plot_mean=True
              foffset=1e-19, x_opt=None, fontsize=9):
-        """plot data from a `CMADataLogger` (using the files written 
+        """plot data from a `CMADataLogger` (using the files written
         by the logger).
 
         Arguments
@@ -8096,7 +8096,7 @@ class FFWrapper(object):
             """
             self.inner_fitness = f
             self.x_transformation = shift if shift else ConstRandnShift()
-            # alternatively we could have called super 
+            # alternatively we could have called super
     class RotatedFitness(TransformSearchSpace):
         """``f = cma.RotatedFitness(cma.fcts.elli)`` constructs a
         rotated ellipsoid function

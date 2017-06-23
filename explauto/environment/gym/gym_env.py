@@ -57,7 +57,7 @@ class GymEnvironment(Environment):
             self.last_observation = observation
 
             if done:
-                print("Done!")
+                # print("Done!")
                 break
 
         observation = self.observation_function(rollout)
