@@ -5,7 +5,9 @@ import numpy as np
 from explauto.sensorimotor_model.inverse.cma import fmin as cma_fmin
 import matplotlib.pyplot as plt
 
-environment = Environment.from_configuration('gym', 'MCC')
+height = True
+
+environment = Environment.from_configuration('gym', 'MCC_height')
 m = environment.random_motors(1)
 s = environment.compute_sensori_effect(m[0])
 
@@ -22,7 +24,7 @@ for m in environment.random_motors(n=100):
 
 im_model = RandomInterest(environment.conf, environment.conf.s_dims)
 
-n_goals = 5000
+n_goals = 1000
 # Number of goals
 cma_maxfevals = 50
 # Maximum error function evaluations by CMAES (actually CMAES will slightly overshoot it)
@@ -31,8 +33,13 @@ cma_sigma0 = 0.2
 
 errors_valid = []
 errors = []
-goals_x = []
-goals_y = []
+
+if height:
+    goals = []
+
+else:
+    goals_x = []
+    goals_y = []
 
 for i in range(n_goals):
     s_g = im_model.sample()
@@ -69,19 +76,27 @@ for i in range(n_goals):
     # Update the surrogate model
 
     error = np.linalg.norm(s_g - s)
-    print("Goal:", s_g, "Reaching Error:", error)
+    print("Iteration {} out of {}; Goal: {}; Reaching error: {}".format(i, n_goals, s_g, error))
 
     # Append errors only for valid goals
-    if s_g[0] <= s_g[1]:
-        errors_valid.append(error)
+    if height:
+        goals.append(s_g[0])
+    else:
+        if s_g[0] <= s_g[1]:
+            errors_valid.append(error)
+        goals_x.append(s_g[0])
+        goals_y.append(s_g[1])
 
-    goals_x.append(s_g[0])
-    goals_y.append(s_g[1])
     errors.append(error)
 
 #plt.plot(errors_valid)
 #plt.savefig("evolution.png")
-plt.scatter(goals_x, goals_y, c=errors)
-plt.xlabel("min")
-plt.ylabel("max")
+if height:
+    plt.scatter(goals, errors)
+else:
+    sc = plt.scatter(goals_x, goals_y, c=errors)
+    plt.colorbar(sc)
+    plt.xlabel("min")
+    plt.ylabel("max")
+
 plt.savefig("scatter.png")
