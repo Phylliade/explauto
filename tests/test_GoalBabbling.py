@@ -1,9 +1,13 @@
+import matplotlib
+matplotlib.use('Agg')
+import matplotlib.pyplot as plt
+
 from explauto import Environment
 from explauto import SensorimotorModel
 from explauto.interest_model.random import RandomInterest
 import numpy as np
 from explauto.sensorimotor_model.inverse.cma import fmin as cma_fmin
-import matplotlib.pyplot as plt
+
 
 height = True
 test_set_size = 100
@@ -32,7 +36,7 @@ for m in environment.random_motors(n=1000):
 
 im_model = RandomInterest(environment.conf, environment.conf.s_dims)
 
-n_goals = 100
+n_goals = 1000
 # Number of goals
 cma_maxfevals = 50
 # Maximum error function evaluations by CMAES (actually CMAES will slightly overshoot it)
@@ -100,18 +104,21 @@ for i in range(n_goals):
 
         errors.append(error)
 
-#plt.plot(errors_valid)
-#plt.savefig("evolution.png")
-if height:
-    er = plt.scatter(goals, errors)
-    go = plt.scatter(goals, goals)
-    ac = plt.scatter(goals, achievements)
-    plt.legend((er, go, ac), ("Errors", "Goals", "Achievements"))
+# plt.plot(errors_valid)
+# plt.savefig("evolution.png")
+ax = plt.subplot()
 
-else:
-    sc = plt.scatter(goals_x, goals_y, c=errors)
-    plt.colorbar(sc)
-    plt.xlabel("min")
-    plt.ylabel("max")
+if True:
+    if height:
+        er = ax.scatter(goals, errors)
+        go = ax.scatter(goals, goals)
+        ac = ax.scatter(goals, achievements)
+        # ax.legend((er, go, ac), ("Errors", "Goals", "Achievements"))
+
+    else:
+        sc = plt.scatter(goals_x, goals_y, c=errors)
+        plt.colorbar(sc)
+        plt.xlabel("min")
+        plt.ylabel("max")
 
 plt.savefig("scatter.png")
