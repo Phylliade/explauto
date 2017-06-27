@@ -27,16 +27,20 @@ else:
 model.mode = "exploit"
 # We don't want the sensorimotor model to add exploration noise
 
+motor_commands = []
+
 # Bootstrap
-for m in environment.random_motors(n=1000):
+for m in environment.random_motors(n=10):
     s = environment.compute_sensori_effect(m)
     # environment.plot_arm(ax, m, alpha=0.2)
     print("Achievement: {}".format(s))
     model.update(m, s)
 
+    motor_commands.append(m)
+
 im_model = RandomInterest(environment.conf, environment.conf.s_dims)
 
-n_goals = 1000
+n_goals = 400
 # Number of goals
 cma_maxfevals = 50
 # Maximum error function evaluations by CMAES (actually CMAES will slightly overshoot it)
@@ -106,6 +110,8 @@ for i in range(n_goals):
 
 # plt.plot(errors_valid)
 # plt.savefig("evolution.png")
+
+
 ax = plt.subplot()
 
 if True:
@@ -113,7 +119,9 @@ if True:
         er = ax.scatter(goals, errors)
         go = ax.scatter(goals, goals)
         ac = ax.scatter(goals, achievements)
-        # ax.legend((er, go, ac), ("Errors", "Goals", "Achievements"))
+        ax.legend((er, go, ac), ("Errors", "Goals", "Achievements"))
+        plt.xlabel("Target Goal")
+        plt.ylabel("Achieved Goal")
 
     else:
         sc = plt.scatter(goals_x, goals_y, c=errors)
@@ -122,3 +130,12 @@ if True:
         plt.ylabel("max")
 
 plt.savefig("scatter.png")
+
+fig_errors = plt.figure()
+plt.plot(errors)
+plt.savefig("errors.png")
+
+plt.figure()
+motor_commands = np.array(motor_commands)
+plt.scatter(motor_commands[:, 0], motor_commands[:, 1])
+plt.savefig("parameter_space.png")
