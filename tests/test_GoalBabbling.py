@@ -8,7 +8,7 @@ import matplotlib.pyplot as plt
 height = True
 test_set_size = 100
 
-environment = Environment.from_configuration('gym', 'MCC_min_pos')
+environment = Environment.from_configuration('gym', 'MCC_height')
 m = environment.random_motors(1)
 s = environment.compute_sensori_effect(m[0])
 
@@ -32,7 +32,7 @@ for m in environment.random_motors(n=1000):
 
 im_model = RandomInterest(environment.conf, environment.conf.s_dims)
 
-n_goals = 1000
+n_goals = 100
 # Number of goals
 cma_maxfevals = 50
 # Maximum error function evaluations by CMAES (actually CMAES will slightly overshoot it)

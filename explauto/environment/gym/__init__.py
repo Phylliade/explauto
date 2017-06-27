@@ -22,6 +22,7 @@ def minimal_position_mountain_car(rollout):
 
 environment = GymEnvironment
 configurations = {
+    'MCC_default': {"name": "MountainCarContinuous-v0", "observation_function": maximal_span_mountain_car, "s_mins": [-1.2, -1.2], "s_maxs": [0.6, 0.6]},
     'MCC_span': {"name": "MountainCarContinuous-v0", "observation_function": maximal_span_mountain_car, "s_mins": [-1.2, -1.2], "s_maxs": [0.6, 0.6]},
     'MCC_height': {"name": "MountainCarContinuous-v0", "observation_function": maximal_height_mountain_car, "s_mins": [0], "s_maxs": [1.2]},
     'MCC_min_pos': {"name": "MountainCarContinuous-v0", "observation_function": minimal_position_mountain_car, "s_mins": [-1.2], "s_maxs": [0.]}
