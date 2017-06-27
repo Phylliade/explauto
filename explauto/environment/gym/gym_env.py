@@ -26,13 +26,16 @@ class GymEnvironment(Environment):
             elif controler == "NN_unbiased":
                 self.controler = self.NN_unbiaised_controler
                 parameter_space_dim = (self.observation_space_dim) * self.action_space_dim
-            m_mins = [-1] * parameter_space_dim
-            m_maxs = [1] * parameter_space_dim
-            print("m_mins:{}".format(m_mins))
+            m_mins = [-2] * parameter_space_dim
+            m_maxs = [2] * parameter_space_dim
         elif controler == "Id":
             self.controler = self.Id_controler
             m_mins = np.tile(self.env.action_space.low, self.rollout_size)
             m_maxs = np.tile(self.env.action_space.high, self.rollout_size)
+        elif controler == "swing":
+            self.controler = self.swing_controler
+            m_mins = [-1]
+            m_maxs = [1]
 
         self.observation_function = (lambda rollout: rollout.flatten()) if observation_function is None else observation_function
 
@@ -72,6 +75,30 @@ class GymEnvironment(Environment):
         actions = params
         return(actions[timestep])
 
+    def swing_controler(self, state, params, **kwargs):
+        """Controler dedicated to solve the MountainCar environment"""
+        x = state[0]
+        v = state[1]
+        intensity = param[0]
+        center = -0.523
+        x -= center
+        action = 0
+
+        if abs(x) <= 0.1 and abs(v) <= 0.1:
+            action = 0
+        if x >= 0 and v >= 0.1:
+            action = 1
+        if x >= 0 and v < 0.01:
+            action = -1
+        if x < 0 and v <= -0.1:
+            action = -1
+        if x < 0 and v > -0.1:
+            action = 1
+
+        action *= intensity
+
+        return(action)
+
     def compute_motor_command(self, actions):
         if len(actions) != self.rollout_size:
             raise(ValueError("The size of actions ({}) does not match the rollout_size ({})").format(len(actions), self.rollout_size))
@@ -81,14 +108,14 @@ class GymEnvironment(Environment):
     def compute_sensori_effect(self, controler_parameters):
         self.last_observation = self.env.reset()
 
-
         # We store a rallout as a series of states
-        rollout = np.zeros((self.rollout_size, self.observation_space_dim))
+        # Fill the rollout with the initial position, in case the episode stops before the end
+        rollout = np.tile(self.last_observation, (self.rollout_size, 1))
 
-        for step in range(self.rollout_size):
-            action = self.controler(self.last_observation, controler_parameters)
+        for step in range(1, self.rollout_size):
+            action = self.controler(self.last_observation, params=controler_parameters, timestep=step)
             observation, reward, done, info = self.env.step([action])
-            rollout[step, :] = observation
+            rollout[step, :] = observation.squeeze()
 
             self.replay_buffer.append([self.last_observation, action, reward, observation])
 
@@ -108,7 +135,6 @@ class GymEnvironment(Environment):
 
     def reset(self):
         self.last_observation = self.env.reset()
-
 
     def plot(self, **kwargs_plot):
         self.env.render()

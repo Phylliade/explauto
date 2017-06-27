@@ -5,18 +5,19 @@ import numpy as np
 def maximal_span_mountain_car(rollout):
     """Returns the max span of a rallout, typically the min and max positions in the Mountain Car environment."""
     # A rollout = Series of (position, speed)
-    min_span = min(rollout[0, :])
-    max_span = max(rollout[0, :])
+    min_span = min(rollout[:, 0])
+    max_span = max(rollout[:, 0])
     return((min_span, max_span))
 
 
 def maximal_height_mountain_car(rollout):
-    max_height = max(np.abs(rollout[0, :]))
+    # Center the position to the initial start
+    max_height = max(np.abs(rollout[:, 0] - (-0.523)))
     return([max_height])
 
 
 def minimal_position_mountain_car(rollout):
-    minimum_position = min(rollout[0, :])
+    minimum_position = min(rollout[:, 0])
     return([minimum_position])
 
 
