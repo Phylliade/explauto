@@ -1,12 +1,10 @@
-import matplotlib
-matplotlib.use('Agg')
 import matplotlib.pyplot as plt
-
 from explauto import Environment
 from explauto import SensorimotorModel
 from explauto.interest_model.random import RandomInterest
 import numpy as np
 from explauto.sensorimotor_model.inverse.cma import fmin as cma_fmin
+import pickle
 
 
 height = True
@@ -36,11 +34,9 @@ for m in environment.random_motors(n=10):
     print("Achievement: {}".format(s))
     model.update(m, s)
 
-    motor_commands.append(m)
-
 im_model = RandomInterest(environment.conf, environment.conf.s_dims)
 
-n_goals = 400
+n_goals = 40
 # Number of goals
 cma_maxfevals = 50
 # Maximum error function evaluations by CMAES (actually CMAES will slightly overshoot it)
@@ -49,6 +45,7 @@ cma_sigma0 = 0.2
 
 errors_valid = []
 errors = []
+errors_full = []
 
 if height:
     goals = []
@@ -92,11 +89,20 @@ for i in range(n_goals):
     model.update(m, s)
     # Update the surrogate model
 
+
+
     error = np.linalg.norm(s_g - s)
     print("Iteration {} out of {}; Achievement: {}; Goal: {}; Reaching error: {}".format(i, n_goals, s, s_g, error))
 
+    # Collect statistics
+    errors_full.append(error)
+
+    # Add the motor command
+    motor_commands.append(m)
+
     if n_goals - i < test_set_size:
-        # Append errors only for valid goals
+        errors.append(error)
+
         if height:
             goals.append(s_g[0])
             achievements.append(s[0])
@@ -106,7 +112,6 @@ for i in range(n_goals):
             goals_x.append(s_g[0])
             goals_y.append(s_g[1])
 
-        errors.append(error)
 
 # plt.plot(errors_valid)
 # plt.savefig("evolution.png")
@@ -131,11 +136,23 @@ if True:
 
 plt.savefig("scatter.png")
 
+# Errors
 fig_errors = plt.figure()
-plt.plot(errors)
+plt.plot(errors_full)
+plt.xlabel("Time")
+plt.ylabel("Errors")
 plt.savefig("errors.png")
 
+# Parameter space exploration
 plt.figure()
 motor_commands = np.array(motor_commands)
-plt.scatter(motor_commands[:, 0], motor_commands[:, 1])
+sc = plt.scatter(motor_commands[:, 0], motor_commands[:, 1], c=errors_full)
+plt.colorbar(sc)
+plt.title("Parameter space exploration")
 plt.savefig("parameter_space.png")
+
+with open("errors.p", "wb") as fd:
+    pickle.dump(errors, fd)
+
+with open("errors_full.p", "wb") as fd:
+    pickle.dump(errors, fd)
