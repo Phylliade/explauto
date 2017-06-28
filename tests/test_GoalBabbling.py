@@ -5,7 +5,7 @@ from explauto.interest_model.random import RandomInterest
 import numpy as np
 from explauto.sensorimotor_model.inverse.cma import fmin as cma_fmin
 import pickle
-
+import config
 
 height = True
 test_set_size = 100
@@ -33,7 +33,7 @@ for m in environment.random_motors(n=10):
 
 im_model = RandomInterest(environment.conf, environment.conf.s_dims)
 
-n_goals = 40
+n_goals = config.n_goals
 # Number of goals
 cma_maxfevals = 50
 # Maximum error function evaluations by CMAES (actually CMAES will slightly overshoot it)
