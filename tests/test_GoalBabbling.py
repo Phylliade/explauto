@@ -155,4 +155,4 @@ with open("errors.p", "wb") as fd:
     pickle.dump(errors, fd)
 
 with open("errors_full.p", "wb") as fd:
-    pickle.dump(errors, fd)
+    pickle.dump(errors_full, fd)
