@@ -10,9 +10,7 @@ import pickle
 height = True
 test_set_size = 100
 
-environment = Environment.from_configuration('gym', 'MCC_height')
-m = environment.random_motors(1)
-s = environment.compute_sensori_effect(m[0])
+environment = Environment.from_configuration('gym', 'MCC_max_pos')
 
 if False:
     model = SensorimotorModel.from_configuration(environment.conf, 'LWLR-BFGS', 'default')
@@ -30,7 +28,6 @@ motor_commands = []
 # Bootstrap
 for m in environment.random_motors(n=10):
     s = environment.compute_sensori_effect(m)
-    # environment.plot_arm(ax, m, alpha=0.2)
     print("Achievement: {}".format(s))
     model.update(m, s)
 
@@ -61,7 +58,6 @@ for i in range(n_goals):
     m0 = model.inverse_prediction(s_g)
 
     # Find the nearest neighbor of s_g and output the corresponding m
-
     def error_f(m_):
         # Error function corresponding to the new goal s_g.
         s_ = environment.compute_sensori_effect(m_)
@@ -72,7 +68,6 @@ for i in range(n_goals):
         # Output the distance between the reached point s_ and the goal s_g
 
     # Call CMAES with the error function for the new goal and use m0 to bootstrap exploration
-
     m = cma_fmin(
         error_f,
         m0,
@@ -84,20 +79,17 @@ for i in range(n_goals):
             'maxfevals': cma_maxfevals
         })[0]
 
-    s = environment.compute_sensori_effect(m)
     # Execute best motor command found by CMAES (optional)
-    model.update(m, s)
+    s = environment.compute_sensori_effect(m)
+
     # Update the surrogate model
-
-
+    model.update(m, s)
 
     error = np.linalg.norm(s_g - s)
-    print("Iteration {} out of {}; Achievement: {}; Goal: {}; Reaching error: {}".format(i, n_goals, s, s_g, error))
+    print("Iteration {} out of {}; Achievement: {}; Goal: {}; Reaching error: {}".format(i + 1, n_goals, s, s_g, error))
 
     # Collect statistics
     errors_full.append(error)
-
-    # Add the motor command
     motor_commands.append(m)
 
     if n_goals - i < test_set_size:
@@ -116,9 +108,9 @@ for i in range(n_goals):
 # plt.plot(errors_valid)
 # plt.savefig("evolution.png")
 
-
+# Plots
+# Learning distribution among the goals
 ax = plt.subplot()
-
 if True:
     if height:
         er = ax.scatter(goals, errors)
@@ -136,7 +128,7 @@ if True:
 
 plt.savefig("scatter.png")
 
-# Errors
+# Evolution of the errors
 fig_errors = plt.figure()
 plt.plot(errors_full)
 plt.xlabel("Time")
