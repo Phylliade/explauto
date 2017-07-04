@@ -26,8 +26,8 @@ class GymEnvironment(Environment):
             elif controler == "NN_unbiased":
                 self.controler = self.NN_unbiaised_controler
                 parameter_space_dim = (self.observation_space_dim) * self.action_space_dim
-            m_mins = [-2] * parameter_space_dim
-            m_maxs = [2] * parameter_space_dim
+            m_mins = [-3] * parameter_space_dim
+            m_maxs = [3] * parameter_space_dim
         elif controler == "Id":
             self.controler = self.Id_controler
             m_mins = np.tile(self.env.action_space.low, self.rollout_size)
