@@ -1,6 +1,7 @@
 from ..environment import Environment
 import gym as openai_gym
 import numpy as np
+import pickle
 
 
 class GymEnvironment(Environment):
@@ -21,12 +22,15 @@ class GymEnvironment(Environment):
 
         self.observation_space_dim = self.env.observation_space.shape[0]
 
-        if controler == "NN" or controler == "NN_unbiased":
+        if controler in ["NN", "NN_unbiased", "NN_tanh_unbiased"]:
             if controler == "NN":
                 self.controler = self.NN_controler
                 parameter_space_dim = (self.observation_space_dim + 1) * self.action_space_dim
             elif controler == "NN_unbiased":
                 self.controler = self.NN_unbiaised_controler
+                parameter_space_dim = (self.observation_space_dim) * self.action_space_dim
+            elif controler == "NN_tanh_unbiased":
+                self.controler = self.NN_unbiaised_tanh_controler
                 parameter_space_dim = (self.observation_space_dim) * self.action_space_dim
             m_mins = [param_min] * parameter_space_dim
             m_maxs = [param_max] * parameter_space_dim
@@ -62,7 +66,11 @@ class GymEnvironment(Environment):
 
     def NN_unbiaised_controler(self, state, params=None, **kwargs):
         W = params.reshape((self.action_space_dim, self.observation_space_dim))
-        return(np.dot(W, state).squeeze())
+        return(np.dot(W, state))
+
+    def NN_unbiaised_tanh_controler(self, state, params=None, **kwargs):
+        W = params.reshape((self.action_space_dim, self.observation_space_dim))
+        return(np.tanh(np.dot(W, state)))
 
     def NN_controler(self, state, params=None, **kwargs):
         """Returns the action for a given state"""
@@ -71,10 +79,11 @@ class GymEnvironment(Environment):
 
         # b has shape (action_space_dim)
         b = params[(self.action_space_dim * self.observation_space_dim):]
-        return(np.dot(W, state).squeeze() + b)
+        return(np.dot(W, state) + b)
 
     def Id_controler(self, timestep, params=None, **kwargs):
         actions = params
+        # FIXME: Return a vector instead of a scalar
         return(actions[timestep])
 
     def swing_controler(self, state, params, **kwargs):
@@ -99,7 +108,8 @@ class GymEnvironment(Environment):
 
         action *= intensity
 
-        return(action)
+        # FIXME: Return a np.array
+        return([action])
 
     def compute_motor_command(self, actions):
         if len(actions) != self.rollout_size:
@@ -116,7 +126,7 @@ class GymEnvironment(Environment):
 
         for step in range(1, self.rollout_size):
             action = self.controler(self.last_observation, params=controler_parameters, timestep=step)
-            observation, reward, done, info = self.env.step([action])
+            observation, reward, done, info = self.env.step(action)
             rollout[step, :] = observation.squeeze()
 
             self.replay_buffer.append([self.last_observation, action, reward, observation])
@@ -134,6 +144,10 @@ class GymEnvironment(Environment):
 
         observation = self.observation_function(rollout)
         return(observation)
+
+    def save_replay_buffer(self, file="replay_buffer.p"):
+        with open(file, "wb") as fd:
+            pickle.dump(np.array(self.replay_buffer), file=fd)
 
     def reset(self):
         self.last_observation = self.env.reset()

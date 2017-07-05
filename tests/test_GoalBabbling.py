@@ -8,7 +8,7 @@ import pickle
 import config
 
 
-environment = Environment.from_configuration('gym', 'MCC_max_pos')
+environment = Environment.from_configuration('gym', 'MCC_max_pos_tanh')
 
 if False:
     model = SensorimotorModel.from_configuration(environment.conf, 'LWLR-BFGS', 'default')
@@ -132,6 +132,9 @@ for i in range(config.n_goals_test):
     goals.append(goal[0])
     achievements.append(achievement[0])
 
+
+# Save the replay buffer
+environment.save_replay_buffer()
 
 # Process the data
 goals = np.array(goals)

@@ -49,7 +49,8 @@ configurations = {
     'MCC_height': {"name": "MountainCarContinuous-v0", "observation_function": maximal_height_mountain_car, "s_mins": [0], "s_maxs": [1.2]},
     'MCC_min_pos': {"name": "MountainCarContinuous-v0", "observation_function": minimal_position_mountain_car, "s_mins": [-1.2], "s_maxs": [0.]},
     'MCC_max_pos': {"name": "MountainCarContinuous-v0", "observation_function": maximal_position_mountain_car, "s_mins": [0.], "s_maxs": [1.1]},
-    'MCC_max_pos_energy': {"name": "MountainCarContinuous-v0", "observation_function": maximal_position_energy_mountain_car, "s_mins": [0., 0.], "s_maxs": [1.1, 0.1]}
+    'MCC_max_pos_energy': {"name": "MountainCarContinuous-v0", "observation_function": maximal_position_energy_mountain_car, "s_mins": [0., 0.], "s_maxs": [1.1, 0.1]},
+    'MCC_max_pos_tanh': {"name": "MountainCarContinuous-v0", "observation_function": maximal_position_mountain_car, "s_mins": [0.], "s_maxs": [1.1], "controler": "NN_tanh_unbiased"}
     # Maximal energy = 1 * 1000 * 0.1 = 100
 }
 
