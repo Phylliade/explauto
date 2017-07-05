@@ -31,12 +31,12 @@ def energy_mountain_car(rollout):
     # Use the energy formula as given by:
     # https://github.com/openai/gym/blob/master/gym/envs/classic_control/continuous_mountain_car.py#L72
     action = rollout[:, 1]
-    ernegy = np.sum(np.power(action, 2) * 0.1)
-    return([ernegy])
+    energy = np.sum(np.power(action, 2) * 0.1)
+    return([energy])
 
 
 def maximal_position_energy_mountain_car(rollout):
-    """Use the ernegy and the maximal position"""
+    """Use the energy and the maximal position"""
     energy = energy_mountain_car(rollout)[0]
     max_pos = maximal_position_mountain_car(rollout)[0]
 
