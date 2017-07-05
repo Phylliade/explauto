@@ -1,1 +1,6 @@
-n_goals = 40
+import config_local
+
+n_goals = 1000
+n_goals_test = 100
+n_motor_commands = 100
+test_set_size = 100
