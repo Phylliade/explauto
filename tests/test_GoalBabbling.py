@@ -6,6 +6,8 @@ import numpy as np
 from explauto.sensorimotor_model.inverse.cma import fmin as cma_fmin
 import pickle
 import config
+import seaborn
+import pandas as pd
 
 
 environment = Environment.from_configuration('gym', 'MCC_max_pos_tanh')
@@ -162,7 +164,8 @@ plt.savefig("success.png")
 
 # Evolution of the errors
 fig_errors = plt.figure()
-plt.plot(errors_full)
+error_full_series = pd.Series(errors_full)
+plt.plot(error_full_series.rolling(window=10, win_type="triang").mean())
 plt.xlabel("Time")
 plt.ylabel("Errors")
 plt.savefig("errors.png")

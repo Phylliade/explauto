@@ -11,3 +11,6 @@ local_variables = ["n_goals", "n_goals_test", "n_motor_commands", "test_set_size
 variables = locals()
 for variable in local_variables:
     variables[variable] = getattr(config_local, variable, variables[variable])
+
+
+n_goals_total = n_goals + n_goals_test
