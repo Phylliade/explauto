@@ -12,8 +12,8 @@ class GymEnvironment(Environment):
         self.env = env
         self.env.seed(123)
         self.last_observation = self.env.reset()
-        param_min = -4
-        param_max = 4
+        param_min = -1000000
+        param_max = 1000000
 
         if len(self.env.observation_space.shape) != 1 or len(self.env.action_space.shape) != 1:
             raise(ValueError("The action or observation space have more than one dimensions, which is not currently supported"))
@@ -81,7 +81,7 @@ class GymEnvironment(Environment):
         """Controler dedicated to solve the MountainCar environment"""
         x = state[0]
         v = state[1]
-        intensity = param[0]
+        intensity = params[0]
         center = -0.523
         x -= center
         action = 0

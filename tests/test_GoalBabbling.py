@@ -120,6 +120,9 @@ for i in range(config.n_goals_test):
     achievement = environment.compute_sensori_effect(m)
     model.update(m, achievement)
 
+    # Compute error
+    error = np.linalg.norm(goal - achievement)
+
     print("Iteration {} out of {}; Achievement: {}; Goal: {}; Reaching error: {}".format(i + 1, config.n_goals_test, achievement, goal, error))
 
     # Collect statistics
