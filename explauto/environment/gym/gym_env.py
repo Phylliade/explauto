@@ -12,6 +12,8 @@ class GymEnvironment(Environment):
         self.env = env
         self.env.seed(123)
         self.last_observation = self.env.reset()
+        param_min = -4
+        param_max = 4
 
         if len(self.env.observation_space.shape) != 1 or len(self.env.action_space.shape) != 1:
             raise(ValueError("The action or observation space have more than one dimensions, which is not currently supported"))
@@ -26,8 +28,8 @@ class GymEnvironment(Environment):
             elif controler == "NN_unbiased":
                 self.controler = self.NN_unbiaised_controler
                 parameter_space_dim = (self.observation_space_dim) * self.action_space_dim
-            m_mins = [-3] * parameter_space_dim
-            m_maxs = [3] * parameter_space_dim
+            m_mins = [param_min] * parameter_space_dim
+            m_maxs = [param_max] * parameter_space_dim
         elif controler == "Id":
             self.controler = self.Id_controler
             m_mins = np.tile(self.env.action_space.low, self.rollout_size)
