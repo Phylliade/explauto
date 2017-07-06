@@ -129,7 +129,8 @@ class GymEnvironment(Environment):
             observation, reward, done, info = self.env.step(action)
             rollout[step, :] = observation.squeeze()
 
-            self.replay_buffer.append([self.last_observation, action, reward, observation])
+            terminal = (step == (self.rollout_size - 1))
+            self.replay_buffer.append([self.last_observation, action, reward, observation, terminal])
 
             self.last_observation = observation
 
