@@ -117,7 +117,8 @@ class GymEnvironment(Environment):
 
         return(actions)
 
-    def compute_sensori_effect(self, controler_parameters):
+    def compute_sensori_effect(self, controler_parameters, render=False):
+        # Start a new episode
         self.last_observation = self.env.reset()
 
         # We store a rallout as a series of states
@@ -134,7 +135,7 @@ class GymEnvironment(Environment):
 
             self.last_observation = observation
 
-            if False:
+            if render:
                 self.env.render()
 
             if done:

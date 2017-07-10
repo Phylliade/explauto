@@ -107,6 +107,9 @@ except KeyboardInterrupt:
 errors = []
 goals = []
 achievements = []
+max_error = 0
+max_error_index = 0
+max_error_command = None
 
 # Remove exploration noise
 model.mode = "exploit"
@@ -125,6 +128,13 @@ for i in range(config.n_goals_test):
     # Compute error
     error = np.linalg.norm(goal - achievement)
 
+    if error > max_error:
+        max_error_goal = goal
+        max_error_index = i
+        max_error_achievement = achievement
+        max_error = error
+        max_error_command = m
+
     print("Iteration {} out of {}; Achievement: {}; Goal: {}; Reaching error: {}".format(i + 1, config.n_goals_test, achievement, goal, error))
 
     # Collect statistics
@@ -134,9 +144,14 @@ for i in range(config.n_goals_test):
     goals.append(goal[0])
     achievements.append(achievement[0])
 
+# Play the max error
+print("Max error. Goal: {}; Achievement: {}".format(max_error_goal, max_error_achievement))
+environment.compute_sensori_effect(max_error_command, render=True)
+
 
 # Save the replay buffer
-environment.save_replay_buffer()
+if config.save_replay_buffer:
+    environment.save_replay_buffer()
 
 # Process the data
 goals = np.array(goals)
@@ -160,7 +175,7 @@ ax.legend((er, go, ac), ("Errors", "Goals", "Achievements"))
 plt.xlabel("Target Goal")
 plt.ylabel("Achieved Goal")
 
-plt.savefig("success.png")
+plt.savefig("Figures/success.png")
 
 # Evolution of the errors
 fig_errors = plt.figure()
@@ -168,17 +183,17 @@ error_full_series = pd.Series(errors_full)
 plt.plot(error_full_series.rolling(window=10, win_type="triang").mean())
 plt.xlabel("Time")
 plt.ylabel("Errors")
-plt.savefig("errors.png")
+plt.savefig("Figures/errors.png")
 
 # Parameter space exploration
 plt.figure()
 sc = plt.scatter(motor_commands_full[:, 0], motor_commands_full[:, 1], c=errors_full)
 plt.colorbar(sc)
 plt.title("Parameter space exploration")
-plt.savefig("parameter_space.png")
+plt.savefig("Figures/parameter_space.png")
 
-with open("errors.p", "wb") as fd:
+with open("data/errors.p", "wb") as fd:
     pickle.dump(errors, fd)
 
-with open("errors_full.p", "wb") as fd:
+with open("data/errors_full.p", "wb") as fd:
     pickle.dump(errors_full, fd)
