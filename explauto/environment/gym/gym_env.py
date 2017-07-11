@@ -39,16 +39,6 @@ class GymEnvironment(Environment):
             m_mins = [param_min] * self.controler.parameter_space_dim
             m_maxs = [param_max] * self.controler.parameter_space_dim
 
-        elif controler == "Id":
-            self.controler = self.Id_controler
-            m_mins = np.tile(self.env.action_space.low, self.rollout_size)
-            m_maxs = np.tile(self.env.action_space.high, self.rollout_size)
-
-        elif controler == "swing":
-            self.controler = self.swing_controler
-            m_mins = [-1]
-            m_maxs = [1]
-
         self.observation_function = (lambda rollout: rollout.flatten()) if observation_function is None else observation_function
 
         self.rollout_size = 1000
@@ -67,38 +57,7 @@ class GymEnvironment(Environment):
             m_maxs,
             s_mins,
             s_maxs
-
         )
-
-    def Id_controler(self, timestep, params=None, **kwargs):
-        actions = params
-        # FIXME: Return a vector instead of a scalar
-        return(actions[timestep])
-
-    def swing_controler(self, state, params, **kwargs):
-        """Controler dedicated to solve the MountainCar environment"""
-        x = state[0]
-        v = state[1]
-        intensity = params[0]
-        center = -0.523
-        x -= center
-        action = 0
-
-        if abs(x) <= 0.1 and abs(v) <= 0.1:
-            action = 0
-        if x >= 0 and v >= 0.1:
-            action = 1
-        if x >= 0 and v < 0.01:
-            action = -1
-        if x < 0 and v <= -0.1:
-            action = -1
-        if x < 0 and v > -0.1:
-            action = 1
-
-        action *= intensity
-
-        # FIXME: Return a np.array
-        return([action])
 
     def compute_motor_command(self, actions):
         if len(actions) != self.rollout_size:

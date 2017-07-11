@@ -12,7 +12,7 @@ class Controler:
         self.observation_space_dim = observation_space_dim
         self.action_space_dim = action_space_dim
 
-    def predict(state):
+    def predict(self, state, **kwargs):
         raise(NotImplementedError)
 
     def set_parameters(self, parameters):
@@ -33,7 +33,7 @@ class NNControler(Controler):
 
         self.parameter_space_dim = (self.observation_space_dim + bias_dim) * self.action_space_dim
 
-    def predict(self, state):
+    def predict(self, state, **kwargs):
         """
         Returns the action for a given state
 
@@ -57,3 +57,35 @@ class NNControler(Controler):
 
     def __call__(self, state):
         return(self.predict(state))
+
+
+class IdentityControler(Controler):
+    def predict(self, timestep, **kwargs):
+        actions = self.parameters
+        return(actions[timestep])
+
+
+class SwingControler(Controler):
+    def predict(self, state, **kwargs):
+        """Controler dedicated to solve the MountainCar environment"""
+        x = state[0]
+        v = state[1]
+        intensity = self.parameters[0]
+        center = -0.523
+        x -= center
+        action = 0
+
+        if abs(x) <= 0.1 and abs(v) <= 0.1:
+            action = 0
+        if x >= 0 and v >= 0.1:
+            action = 1
+        if x >= 0 and v < 0.01:
+            action = -1
+        if x < 0 and v <= -0.1:
+            action = -1
+        if x < 0 and v > -0.1:
+            action = 1
+
+        action *= intensity
+
+        return([action])
