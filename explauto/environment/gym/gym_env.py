@@ -1,7 +1,11 @@
 from ..environment import Environment
+from .controler import NNControler
 import gym as openai_gym
 import numpy as np
 import pickle
+
+
+DEBUG = False
 
 
 class GymEnvironment(Environment):
@@ -22,22 +26,24 @@ class GymEnvironment(Environment):
 
         self.observation_space_dim = self.env.observation_space.shape[0]
 
-        if controler in ["NN", "NN_unbiased", "NN_tanh_unbiased"]:
+        if controler in ["NN", "NN_tanh", "NN_unbiased", "NN_tanh_unbiased"]:
             if controler == "NN":
-                self.controler = self.NN_controler
-                parameter_space_dim = (self.observation_space_dim + 1) * self.action_space_dim
+                self.controler = NNControler(tanh=False, bias=True, observation_space_dim=self.observation_space_dim, action_space_dim=self.action_space_dim)
+            if controler == "NN_tanh":
+                self.controler = NNControler(tanh=True, bias=True, observation_space_dim=self.observation_space_dim, action_space_dim=self.action_space_dim)
             elif controler == "NN_unbiased":
-                self.controler = self.NN_unbiaised_controler
-                parameter_space_dim = (self.observation_space_dim) * self.action_space_dim
+                self.controler = NNControler(tanh=False, bias=False, observation_space_dim=self.observation_space_dim, action_space_dim=self.action_space_dim)
             elif controler == "NN_tanh_unbiased":
-                self.controler = self.NN_unbiaised_tanh_controler
-                parameter_space_dim = (self.observation_space_dim) * self.action_space_dim
-            m_mins = [param_min] * parameter_space_dim
-            m_maxs = [param_max] * parameter_space_dim
+                self.controler = NNControler(bias=False, tanh=True, observation_space_dim=self.observation_space_dim, action_space_dim=self.action_space_dim)
+
+            m_mins = [param_min] * self.controler.parameter_space_dim
+            m_maxs = [param_max] * self.controler.parameter_space_dim
+
         elif controler == "Id":
             self.controler = self.Id_controler
             m_mins = np.tile(self.env.action_space.low, self.rollout_size)
             m_maxs = np.tile(self.env.action_space.high, self.rollout_size)
+
         elif controler == "swing":
             self.controler = self.swing_controler
             m_mins = [-1]
@@ -63,23 +69,6 @@ class GymEnvironment(Environment):
             s_maxs
 
         )
-
-    def NN_unbiaised_controler(self, state, params=None, **kwargs):
-        W = params.reshape((self.action_space_dim, self.observation_space_dim))
-        return(np.dot(W, state))
-
-    def NN_unbiaised_tanh_controler(self, state, params=None, **kwargs):
-        W = params.reshape((self.action_space_dim, self.observation_space_dim))
-        return(np.tanh(np.dot(W, state)))
-
-    def NN_controler(self, state, params=None, **kwargs):
-        """Returns the action for a given state"""
-        # W has size (state_space_dim, action_space_dim)
-        W = params[:(self.action_space_dim * self.observation_space_dim)].reshape((self.action_space_dim, self.observation_space_dim))
-
-        # b has shape (action_space_dim)
-        b = params[(self.action_space_dim * self.observation_space_dim):]
-        return(np.dot(W, state) + b)
 
     def Id_controler(self, timestep, params=None, **kwargs):
         actions = params
@@ -126,7 +115,9 @@ class GymEnvironment(Environment):
         rollout = np.tile(self.last_observation, (self.rollout_size, 1))
 
         for step in range(1, self.rollout_size):
-            action = self.controler(self.last_observation, params=controler_parameters, timestep=step)
+            self.controler.set_parameters(controler_parameters)
+            action = self.controler(self.last_observation)
+
             observation, reward, done, info = self.env.step(action)
             rollout[step, :] = observation.squeeze()
 
@@ -139,7 +130,7 @@ class GymEnvironment(Environment):
                 self.env.render()
 
             if done:
-                if False:
+                if DEBUG:
                     print("Done!")
                     print("Number of steps: {}".format(step))
                 break
