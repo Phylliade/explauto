@@ -65,7 +65,7 @@ class GymEnvironment(Environment):
 
         return(actions)
 
-    def compute_sensori_effect(self, controler_parameters, render=False):
+    def compute_sensori_effect(self, controler_parameters, render=False, save_to_replay_buffer=False):
         # Start a new episode
         self.last_observation = self.env.reset()
 
@@ -81,7 +81,8 @@ class GymEnvironment(Environment):
             rollout[step, :] = observation.squeeze()
 
             terminal = (step == (self.rollout_size - 1))
-            self.replay_buffer.append([self.last_observation, action, reward, observation, terminal])
+            if save_to_replay_buffer:
+                self.replay_buffer.append([self.last_observation, action, reward, observation, terminal])
 
             self.last_observation = observation
 

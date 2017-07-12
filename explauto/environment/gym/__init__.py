@@ -2,6 +2,9 @@ from .gym_env import GymEnvironment
 import numpy as np
 
 MC_center = 0
+# FIXME: Use an env_wrapper attribute
+MC_max_pos = 0.6 - (-0.523)
+MC_min_pos = -1.2 -(-0.523)
 
 
 def maximal_span_mountain_car(rollout):
@@ -46,14 +49,14 @@ def maximal_position_energy_mountain_car(rollout):
 
 environment = GymEnvironment
 configurations = {
-    'MCC_default': {"name": "MountainCarContinuous-v1", "observation_function": maximal_span_mountain_car, "s_mins": [-1.2, -1.2], "s_maxs": [0.6, 0.6]},
-    'MCC_span': {"name": "MountainCarContinuous-v1", "observation_function": maximal_span_mountain_car, "s_mins": [-1.2, -1.2], "s_maxs": [0.6, 0.6]},
-    'MCC_height': {"name": "MountainCarContinuous-v1", "observation_function": maximal_height_mountain_car, "s_mins": [0], "s_maxs": [1.2]},
-    'MCC_min_pos': {"name": "MountainCarContinuous-v1", "observation_function": minimal_position_mountain_car, "s_mins": [-1.2], "s_maxs": [0.]},
-    'MCC_max_pos': {"name": "MountainCarContinuous-v1", "observation_function": maximal_position_mountain_car, "s_mins": [0.], "s_maxs": [1.1]},
-    'MCC_max_pos_energy': {"name": "MountainCarContinuous-v1", "observation_function": maximal_position_energy_mountain_car, "s_mins": [0., 0.], "s_maxs": [1.1, 0.1]},
-    'MCC_max_pos_tanh_unbiased': {"name": "MountainCarContinuous-v1", "observation_function": maximal_position_mountain_car, "s_mins": [0.], "s_maxs": [1.1], "controler": "NN_tanh_unbiased"},
-    'MCC_max_pos_tanh': {"name": "MountainCarContinuous-v0", "observation_function": maximal_position_mountain_car, "s_mins": [0.], "s_maxs": [1.1], "controler": "NN_tanh"}
+    'MCC_default': {"name": "MountainCarContinuous-v1", "observation_function": maximal_span_mountain_car, "s_mins": [MC_min_pos, MC_min_pos], "s_maxs": [MC_max_pos, MC_max_pos]},
+    'MCC_span': {"name": "MountainCarContinuous-v1", "observation_function": maximal_span_mountain_car, "s_mins": [MC_min_pos, MC_min_pos], "s_maxs": [MC_max_pos, MC_max_pos]},
+    'MCC_height': {"name": "MountainCarContinuous-v1", "observation_function": maximal_height_mountain_car, "s_mins": [0], "s_maxs": [max(abs(MC_max_pos), abs(MC_min_pos))]},
+    'MCC_min_pos': {"name": "MountainCarContinuous-v1", "observation_function": minimal_position_mountain_car, "s_mins": [MC_min_pos], "s_maxs": [0.]},
+    'MCC_max_pos': {"name": "MountainCarContinuous-v1", "observation_function": maximal_position_mountain_car, "s_mins": [0.], "s_maxs": [MC_max_pos]},
+    'MCC_max_pos_energy': {"name": "MountainCarContinuous-v1", "observation_function": maximal_position_energy_mountain_car, "s_mins": [0., 0.], "s_maxs": [MC_max_pos, 0.1]},
+    'MCC_max_pos_tanh_unbiased': {"name": "MountainCarContinuous-v1", "observation_function": maximal_position_mountain_car, "s_mins": [0.], "s_maxs": [MC_max_pos], "controler": "NN_tanh_unbiased"},
+    'MCC_max_pos_tanh': {"name": "MountainCarContinuous-v1", "observation_function": maximal_position_mountain_car, "s_mins": [0.], "s_maxs": [MC_max_pos], "controler": "NN_tanh"}
     # Maximal energy = 1 * 1000 * 0.1 = 100
 }
 
