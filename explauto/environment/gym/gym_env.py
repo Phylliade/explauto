@@ -1,6 +1,7 @@
 from ..environment import Environment
 from .controler import NNControler
 import gym as openai_gym
+import gymextra
 import numpy as np
 import pickle
 
@@ -65,7 +66,7 @@ class GymEnvironment(Environment):
 
         return(actions)
 
-    def compute_sensori_effect(self, controler_parameters, render=False, save_to_replay_buffer=False):
+    def compute_sensori_effect(self, controler_parameters, render=False, save_to_replay_buffer=False, noisy_action=False, noise_intensity=1.0):
         # Start a new episode
         self.last_observation = self.env.reset()
 
@@ -76,11 +77,13 @@ class GymEnvironment(Environment):
         for step in range(1, self.rollout_size):
             self.controler.set_parameters(controler_parameters)
             action = self.controler(self.last_observation)
+            if noisy_action:
+                action += np.random.normal(scale=noise_intensity, size=self.action_space_dim)
 
             observation, reward, done, info = self.env.step(action)
             rollout[step, :] = observation.squeeze()
 
-            terminal = (step == (self.rollout_size - 1))
+            terminal = (step == (self.rollout_size - 1)) or done
             if save_to_replay_buffer:
                 self.replay_buffer.append([self.last_observation, action, reward, observation, terminal])
 
@@ -89,7 +92,7 @@ class GymEnvironment(Environment):
             if render:
                 self.env.render()
 
-            if done:
+            if terminal:
                 if DEBUG:
                     print("Done!")
                     print("Number of steps: {}".format(step))
@@ -99,6 +102,7 @@ class GymEnvironment(Environment):
         return(observation)
 
     def save_replay_buffer(self, file="replay_buffer.p"):
+        print("Saving replay buffer")
         with open(file, "wb") as fd:
             pickle.dump(np.array(self.replay_buffer), file=fd)
 
