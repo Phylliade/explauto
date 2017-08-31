@@ -70,6 +70,8 @@ class GymEnvironment(Environment):
         # Start a new episode
         self.last_observation = self.env.reset()
 
+        episode_reward = 0
+
         # We store a rallout as a series of states
         # Fill the rollout with the initial position, in case the episode stops before the end
         rollout = np.tile(self.last_observation, (self.rollout_size, 1))
@@ -86,7 +88,11 @@ class GymEnvironment(Environment):
             observation, reward, done, info = self.env.step(action)
             rollout[step, :] = observation.squeeze()
 
+            episode_reward += reward
+
             terminal = (step == (self.rollout_size - 1)) or done
+
+            # Save to replay buffer
             if save_to_replay_buffer:
                 self.replay_buffer.append([self.last_observation, action, reward, observation, terminal])
 
@@ -102,7 +108,7 @@ class GymEnvironment(Environment):
                 break
 
         observation = self.observation_function(rollout)
-        return(observation)
+        return((observation, episode_reward))
 
     def save_replay_buffer(self, file="replay_buffer.p"):
         print("Saving replay buffer")
