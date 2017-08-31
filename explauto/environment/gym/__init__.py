@@ -4,7 +4,7 @@ import numpy as np
 MC_center = 0
 # FIXME: Use an env_wrapper attribute
 MC_max_pos = 0.6 - (-0.523)
-MC_min_pos = -1.2 -(-0.523)
+MC_min_pos = -1.2 - (-0.523)
 
 
 def maximal_span_mountain_car(rollout):

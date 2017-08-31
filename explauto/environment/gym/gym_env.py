@@ -78,7 +78,10 @@ class GymEnvironment(Environment):
             self.controler.set_parameters(controler_parameters)
             action = self.controler(self.last_observation)
             if noisy_action:
+                # TODO: Use a truncated normal instead, to avoid clipping
                 action += np.random.normal(scale=noise_intensity, size=self.action_space_dim)
+            # Clip the action in the bounds defined in self.env
+            action = np.clip(action, self.env.action_space.low, self.env.action_space.high)
 
             observation, reward, done, info = self.env.step(action)
             rollout[step, :] = observation.squeeze()
