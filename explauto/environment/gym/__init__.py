@@ -47,6 +47,7 @@ def maximal_position_energy_mountain_car(rollout):
 
     return([max_pos, energy])
 
+
 environment = GymEnvironment
 configurations = {
     'MCC_default': {"name": "MountainCarContinuous-v1", "observation_function": maximal_span_mountain_car, "s_mins": [MC_min_pos, MC_min_pos], "s_maxs": [MC_max_pos, MC_max_pos]},

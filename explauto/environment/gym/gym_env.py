@@ -1,7 +1,7 @@
 from ..environment import Environment
 from .controler import NNControler
 import gym as openai_gym
-import gymextra
+import scipy.stats
 import numpy as np
 import pickle
 
@@ -81,9 +81,10 @@ class GymEnvironment(Environment):
             action = self.controler(self.last_observation)
             if noisy_action:
                 # TODO: Use a truncated normal instead, to avoid clipping
-                action += np.random.normal(scale=noise_intensity, size=self.action_space_dim)
+                # action += np.random.normal(scale=noise_intensity, size=self.action_space_dim)
+                action += scipy.stats.truncnorm.rvs(-1 - action, 1 - action, scale=noise_intensity, size=self.action_space_dim)
             # Clip the action in the bounds defined in self.env
-            action = np.clip(action, self.env.action_space.low, self.env.action_space.high)
+            # action = np.clip(action, self.env.action_space.low, self.env.action_space.high)
 
             observation, reward, done, info = self.env.step(action)
             rollout[step, :] = observation.squeeze()
@@ -94,6 +95,7 @@ class GymEnvironment(Environment):
 
             # Save to replay buffer
             if save_to_replay_buffer:
+                # TODO: Use rl's memory object instead of a numpy array
                 self.replay_buffer.append([self.last_observation, action, reward, observation, terminal])
 
             self.last_observation = observation
