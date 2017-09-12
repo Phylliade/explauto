@@ -59,6 +59,53 @@ class NNControler(Controler):
         return(self.predict(state))
 
 
+class MLPControler(Controler):
+    def __init__(self, layers, tanh=True, **kwargs):
+        super().__init__(**kwargs)
+
+        self.tanh = tanh
+
+        # Dimensions of the different intermediate states (inputs and outputs) of the network
+        self.states_dims = [self.observation_space_dim] + layers + [self.action_space_dim]
+
+        # A list storing the si zes of each layers
+        self.layers_dims = list(zip(self.states_dims[:-1], self.states_dims[1:]))
+        self.layers_sizes = [(x[0] + 1) * x[1] for x in self.layers_dims]
+
+        # Do not forget the bias
+        self.parameter_space_dim = sum(self.layers_sizes)
+
+    def predict(self, state, **kwargs):
+        """
+        Returns the action for a given state
+
+        Keras compatible
+        """
+        # W has size (state_space_dim, action_space_dim)
+        output = state
+        # Position in the parameter space list
+        cursor = 0
+        for layer_index, layer_dims in enumerate(self.layers_dims):
+            # layer_size = self.layers_sizes[layer_index]
+            W_size = (layer_dims[0] * layer_dims[1])
+            W = self.parameters[cursor:(cursor + W_size)].reshape((layer_dims[1], layer_dims[0]))
+            cursor += W_size
+
+            b_size = 1 * layer_dims[1]
+            b = self.parameters[cursor:(cursor + b_size)]
+            cursor += b_size
+
+            output = np.dot(W, output) + b
+
+            if self.tanh:
+                output = np.tanh(output)
+
+        return(output)
+
+    def __call__(self, state):
+        return(self.predict(state))
+
+
 class IdentityControler(Controler):
     def predict(self, timestep, **kwargs):
         actions = self.parameters
