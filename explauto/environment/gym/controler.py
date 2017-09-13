@@ -2,15 +2,19 @@ import numpy as np
 
 
 class Controler:
-    def __init__(self, observation_space_dim, action_space_dim):
+    def __init__(self, env, parameters_min=-1., parameters_max=+1.,):
         """
         Abstract Controler object
 
         :param observation_space_dim:
         :param action_space_dim:
         """
-        self.observation_space_dim = observation_space_dim
-        self.action_space_dim = action_space_dim
+        self.observation_space_dim = env.observation_space.shape[0]
+        self.action_space_dim = env.action_space.shape[0]
+
+        # Bounds of each weight
+        self.parameters_min = parameters_min
+        self.parameters_max = parameters_max
 
     def predict(self, state, **kwargs):
         raise(NotImplementedError)
@@ -60,13 +64,14 @@ class NNControler(Controler):
 
 
 class MLPControler(Controler):
-    def __init__(self, layers, tanh=True, **kwargs):
+    def __init__(self, layers, zeroed_output=0, tanh=True, **kwargs):
         super().__init__(**kwargs)
 
         self.tanh = tanh
+        self.zeroed_output = zeroed_output
 
         # Dimensions of the different intermediate states (inputs and outputs) of the network
-        self.states_dims = [self.observation_space_dim] + layers + [self.action_space_dim]
+        self.states_dims = [self.observation_space_dim] + layers + [self.action_space_dim - zeroed_output]
 
         # A list storing the si zes of each layers
         self.layers_dims = list(zip(self.states_dims[:-1], self.states_dims[1:]))
@@ -100,6 +105,11 @@ class MLPControler(Controler):
             if self.tanh:
                 output = np.tanh(output)
 
+        if self.zeroed_output != 0:
+            return_value = np.zeros((self.action_space_dim, 1))
+            return_value[:self.zeroed_output] = output
+        else:
+            return_value = output
         return(output)
 
     def __call__(self, state):
