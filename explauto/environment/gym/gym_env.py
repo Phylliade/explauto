@@ -36,8 +36,8 @@ class GymEnvironment(Environment):
         else:
             self.controler = controler
 
-            m_mins = [self.controler.parameters_min] * self.controler.parameter_space_dim
-            m_maxs = [self.controler.parameters_max] * self.controler.parameter_space_dim
+        m_mins = [self.controler.parameters_min] * self.controler.parameter_space_dim
+        m_maxs = [self.controler.parameters_max] * self.controler.parameter_space_dim
 
         self.observation_function = (lambda rollout: rollout.flatten()) if observation_function is None else observation_function
 
