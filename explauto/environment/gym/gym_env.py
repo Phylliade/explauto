@@ -1,6 +1,5 @@
 from ..environment import Environment
 from .controler import NNControler, MLPControler
-import gym as openai_gym
 import scipy.stats
 import numpy as np
 import pickle

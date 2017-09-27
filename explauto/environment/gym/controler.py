@@ -25,7 +25,7 @@ class Controler:
 
 class NNControler(Controler):
     def __init__(self, tanh=True, bias=True, **kwargs):
-        super().__init__(**kwargs)
+        super().__init__(parameters_min=-1e5, parameters_max=+1e5, **kwargs)
 
         self.tanh = tanh
         self.bias = bias

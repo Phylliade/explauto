@@ -55,4 +55,10 @@ envs_configs = {
         "s_maxs": [MC_max_pos],
         "controler": "NN_tanh"
     },
+    "MCC_max_pos_tanh_unbiased": {
+        "observation_function": maximal_position_mountain_car,
+        "s_mins": [0.],
+        "s_maxs": [MC_max_pos],
+        "controler": "NN_tanh_unbiased"
+    },
 }
