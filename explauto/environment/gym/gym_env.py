@@ -129,3 +129,8 @@ class GymEnvironment(Environment):
 
     def plot(self, **kwargs_plot):
         self.env.render()
+
+    def save_controler_weights(self, file):
+        print("Saving weights")
+        with open(file, "wb") as fd:
+            pickle.dump(self.controler.get_weights(), fd)

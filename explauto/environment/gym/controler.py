@@ -16,11 +16,18 @@ class Controler:
         self.parameters_min = parameters_min
         self.parameters_max = parameters_max
 
+        # List of weights
+        self.weights = {}
+
     def predict(self, state, **kwargs):
         raise(NotImplementedError)
 
     def set_parameters(self, parameters):
         self.parameters = parameters
+
+    def get_weights(self):
+        return self.weights
+
 
 
 class NNControler(Controler):
@@ -57,6 +64,10 @@ class NNControler(Controler):
         if self.tanh:
             action = np.tanh(action)
 
+        # Save weights
+        self.weights["w"] = W
+        self.weights["b"] = b
+
         return(action)
 
     def __call__(self, state):
@@ -73,7 +84,7 @@ class MLPControler(Controler):
         # Dimensions of the different intermediate states (inputs and outputs) of the network
         self.states_dims = [self.observation_space_dim] + layers + [self.action_space_dim - zeroed_output]
 
-        # A list storing the si zes of each layers
+        # A list storing the sizes of each layers
         self.layers_dims = list(zip(self.states_dims[:-1], self.states_dims[1:]))
         self.layers_sizes = [(x[0] + 1) * x[1] for x in self.layers_dims]
 
