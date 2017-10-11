@@ -9,10 +9,20 @@ class Controler:
         :param observation_space_dim:
         :param action_space_dim:
         """
+        # Observation space
         self.observation_space_dim = env.observation_space.shape[0]
-        self.action_space_dim = env.action_space.shape[0]
+        self.observation_space_low = env.observation_space.low
+        self.observation_space_high = env.observation_space.high
 
-        # Bounds of each weight
+        # Action space
+        self.action_space_dim = env.action_space.shape[0]
+        self.action_space_low = env.action_space.low
+        self.action_space_high = env.action_space.high
+
+        # Parameter space
+        self.parameter_space_dim = parameter_space_dim
+
+        # Bounds of each parameter
         self.parameters_min = parameters_min
         self.parameters_max = parameters_max
 
@@ -22,6 +32,10 @@ class Controler:
 
     def predict(self, state, **kwargs):
         raise(NotImplementedError)
+
+    def __call__(self, state, **kwargs):
+        return(self.predict(state, **kwargs))
+
 
     def set_parameters(self, parameters):
         self.parameters = parameters
@@ -37,7 +51,7 @@ class RandomControler(Controler):
 
     def predict(self, state):
         """Choose uniformly distributed actions"""
-        action = np.random.uniform(low=self.env.action_space.low, high=self.env.action_space.high, size=(self.action_space_dim,))
+        action = np.random.uniform(low=self.action_space_low, high=self.action_space_high, size=(self.action_space_dim,))
 
         return(action)
 
@@ -81,9 +95,6 @@ class NNControler(Controler):
         self.weights["b"] = b
 
         return(action)
-
-    def __call__(self, state):
-        return(self.predict(state))
 
 
 class MLPControler(Controler):
@@ -134,9 +145,6 @@ class MLPControler(Controler):
         else:
             return_value = output
         return(output)
-
-    def __call__(self, state):
-        return(self.predict(state))
 
 
 class IdentityControler(Controler):

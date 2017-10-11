@@ -1,5 +1,5 @@
 from ..environment import Environment
-from .controler import NNControler, MLPControler, RandomControler
+from .controler import NNControler, RandomControler
 import scipy.stats
 import numpy as np
 import pickle
