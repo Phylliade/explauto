@@ -1,5 +1,5 @@
 from ..environment import Environment
-from .controler import NNControler, MLPControler
+from .controler import NNControler, MLPControler, RandomControler
 import scipy.stats
 import numpy as np
 import pickle
@@ -30,8 +30,8 @@ class GymEnvironment(Environment):
             self.controler = NNControler(tanh=False, bias=False, env=env)
         elif controler == "NN_tanh_unbiased":
             self.controler = NNControler(bias=False, tanh=True, env=env)
-        elif controler == "MLP":
-            self.controler = MLPControler(observation_space_dim=self.observation_space_dim, action_space_dim=self.action_space_dim)
+        elif controler == "random":
+            self.controler = RandomControler(env)
         else:
             self.controler = controler
 

@@ -2,7 +2,7 @@ import numpy as np
 
 
 class Controler:
-    def __init__(self, env, parameters_min=-1., parameters_max=+1.,):
+    def __init__(self, env, parameter_space_dim, parameters_min=-1., parameters_max=+1.):
         """
         Abstract Controler object
 
@@ -17,6 +17,7 @@ class Controler:
         self.parameters_max = parameters_max
 
         # List of weights
+        # This is a dict equivalent of the `parameters` attribute
         self.weights = {}
 
     def predict(self, state, **kwargs):
@@ -29,11 +30,20 @@ class Controler:
         return self.weights
 
 
+class RandomControler(Controler):
+    def __init__(self, env):
+        # We emulate a parameter space
+        super(RandomControler, self).__init__(env=env, parameter_space_dim=1)
+
+    def predict(self, state):
+        """Choose uniformly distributed actions"""
+        action = np.random.uniform(low=self.env.action_space.low, high=self.env.action_space.high, size=(self.action_space_dim,))
+
+        return(action)
+
 
 class NNControler(Controler):
     def __init__(self, tanh=True, bias=True, **kwargs):
-        super().__init__(parameters_min=-1e5, parameters_max=+1e5, **kwargs)
-
         self.tanh = tanh
         self.bias = bias
 
@@ -42,7 +52,9 @@ class NNControler(Controler):
         else:
             bias_dim = 0
 
-        self.parameter_space_dim = (self.observation_space_dim + bias_dim) * self.action_space_dim
+        parameter_space_dim = (self.observation_space_dim + bias_dim) * self.action_space_dim
+
+        super().__init__(parameter_space_dim=parameter_space_dim, parameters_min=-1e5, parameters_max=+1e5, **kwargs)
 
     def predict(self, state, **kwargs):
         """
@@ -76,7 +88,6 @@ class NNControler(Controler):
 
 class MLPControler(Controler):
     def __init__(self, layers, zeroed_output=0, tanh=True, **kwargs):
-        super().__init__(**kwargs)
 
         self.tanh = tanh
         self.zeroed_output = zeroed_output
@@ -89,7 +100,8 @@ class MLPControler(Controler):
         self.layers_sizes = [(x[0] + 1) * x[1] for x in self.layers_dims]
 
         # Do not forget the bias
-        self.parameter_space_dim = sum(self.layers_sizes)
+        parameter_space_dim = sum(self.layers_sizes)
+        super(MLPControler, self).__init__(parameter_space_dim=parameter_space_dim, **kwargs)
 
     def predict(self, state, **kwargs):
         """
